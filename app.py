@@ -1,5 +1,7 @@
 import streamlit as st
 import os
+import numpy as np
+import joblib
 
 # ตั้งค่าหน้าเว็บ
 st.set_page_config(page_title="ML & Neural Network Web App", layout="wide")

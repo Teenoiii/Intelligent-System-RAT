@@ -2,17 +2,25 @@ import streamlit as st
 import joblib
 import pandas as pd
 import numpy as np
+import time
 
 # โหลดโมเดล XGBoost
 model_path = "models/xgboost_best_model.pkl"
 model = joblib.load(model_path)
 
-st.title("🏠 Machine Learning Model Demo - Predict House Price")
+# โหลด Dataset เพื่อตรวจสอบค่าต่ำสุด-สูงสุดของขนาดพื้นที่
+df = pd.read_csv("Housing.csv")
+area_min = int(df["area"].min())
+area_max = int(df["area"].max())
+
+st.title("🏠 Machine Learning Model Demo - Predict California House Price") 
 
 st.write("📌 **กรอกค่าคุณสมบัติของบ้านเพื่อทำนายราคา**")
 
 # ✅ **เพิ่มคำอธิบายฟีเจอร์ + ปรับ UI**
-area = st.number_input("🏠 ขนาดพื้นที่ (ตร.ม.)", min_value=10, max_value=10000, value=3000)
+area = st.number_input(f"🏠 ขนาดพื้นที่ (ตร.ม.) (ระหว่าง {area_min} - {area_max})", 
+                        min_value=area_min, max_value=area_max, value=(area_min + area_max) // 2)
+
 bedrooms = st.slider("🛏 จำนวนห้องนอน", 1, 10, 3)
 bathrooms = st.slider("🚿 จำนวนห้องน้ำ", 1, 10, 2)
 stories = st.slider("🏢 จำนวนชั้นของบ้าน", 1, 5, 2)
@@ -38,19 +46,37 @@ area_per_story = round(area / stories, 2) if stories > 0 else 0
 # ✅ **ปุ่มพยากรณ์**
 if st.button("📊 Predict Price"):
     try:
+        # ✅ **สร้าง placeholder สำหรับแสดงผล**
+        placeholder = st.empty()
+
+        placeholder.markdown("⌛ **กำลังคำนวณราคา...**")
+        time.sleep(1)
+
+        # ✅ **แสดง Progress Bar**
+        placeholder.progress(0, "เตรียมข้อมูล...")
+        time.sleep(1)
+        placeholder.progress(50, "กำลังประมวลผลโมเดล...")
+        time.sleep(1)
+        placeholder.progress(100, "กำลังแสดงผลลัพธ์...")
+        time.sleep(1)
+
         # ✅ **สร้าง DataFrame ให้ตรงกับฟีเจอร์ที่โมเดลต้องการ**
         input_data = np.array([[area, bedrooms, bathrooms, stories, parking,
                                 int(mainroad_yes), int(guestroom_yes), int(basement_yes),
                                 int(hotwaterheating_yes), int(airconditioning_yes), int(prefarea_yes),
                                 furnishingstatus_semi, furnishingstatus_unfurnished, bathroom_ratio, area_per_story]])
 
-        df = pd.DataFrame(input_data, columns=model.feature_names_in_)
+        df_input = pd.DataFrame(input_data, columns=model.feature_names_in_)
 
         # ✅ **ใช้โมเดลพยากรณ์**
-        prediction = model.predict(df)[0]
+        prediction = model.predict(df_input)[0]
 
         # ✅ **แสดงผลลัพธ์**
-        st.success(f"🏠 ราคาบ้านที่คาดการณ์: {prediction:,.2f} บาท")
+        placeholder.success(f"🏠 ราคาบ้านที่คาดการณ์: {prediction:,.2f} บาท")
+        time.sleep(2)
+
+        # ✅ **เคลียร์ข้อความ**
+        placeholder.empty()
 
     except Exception as e:
         st.error(f"⚠️ เกิดข้อผิดพลาด: {e}")
