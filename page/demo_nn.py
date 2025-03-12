@@ -19,7 +19,7 @@ EXCHANGE_RATE = 0.42  # 1 รูปี ≈ 0.42 บาท
 car_brands = list(ct.transformers_[1][1].categories_[2])  # ยี่ห้อรถ
 car_models = list(ct.transformers_[1][1].categories_[3])  # รุ่นรถ
 
-st.title("🚗 พยากรณ์ราคารถยนต์ด้วย AI")
+st.title("🚗 Neural Network Model Demo พยากรณ์ราคารถยนต์ด้วย AI")
 
 # ✅ UI สำหรับป้อนข้อมูล
 fuel_type = st.selectbox("ชนิดของเชื้อเพลิง", ["Petrol", "Diesel", "CNG", "Electric", "Lpg"])
